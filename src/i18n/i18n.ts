@@ -4,6 +4,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 
 import enTranslation from './locales/en/translation.json';
 import hiTranslation from './locales/hi/translation.json';
+import knTranslation from './locales/kn/translation.json';
 
 // Get saved language preference safely
 let savedLanguage;
@@ -24,6 +25,9 @@ i18n
       },
       hi: {
         translation: hiTranslation
+      },
+      kn: {
+        translation: knTranslation
       }
     },
     lng: savedLanguage || 'en',

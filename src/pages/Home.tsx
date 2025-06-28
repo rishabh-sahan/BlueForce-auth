@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, Shield, Users, ChevronDown, ThumbsUp, X } from 'lucide-react';
+import { Clock, Shield, Users, ChevronDown, ThumbsUp, X, MapPin, Star, User } from 'lucide-react';
 import ImageSlider from '../components/home/ImageSlider';
 import FeatureScroll from '../components/home/FeatureScroll';
 import TestimonialScroll from '../components/home/TestimonialScroll';
@@ -34,30 +34,6 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(style);
 }
 
-const faqs = [
-  {
-    question: 'What is BlueForce?',
-    answer: 'BlueForce is a platform connecting skilled blue-collar workers with employers and individuals seeking their services.'
-  },
-  {
-    question: 'How do I register as a worker or employer?',
-    answer: 'Simply click on Register, choose your role, and complete your profile to get started.'
-  },
-  {
-    question: 'Is there a fee to use BlueForce?',
-    answer: 'Registration is free for both workers and employers. Some premium features may have a fee.'
-  },
-  {
-    question: 'How are workers verified?',
-    answer: 'Workers are verified through document checks and skill assessments to ensure quality and trust.'
-  },
-  {
-    question: 'Can I change my account type later?',
-    answer: 'Yes, you can change your account type from your profile settings at any time.'
-  },
-];
-
-// Animated Counter component
 function AnimatedCounter({ value, duration = 1200, className = '' }: { value: number, duration?: number, className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   useEffect(() => {
@@ -83,9 +59,39 @@ function AnimatedCounter({ value, duration = 1200, className = '' }: { value: nu
   return <span ref={ref} className={className}>0</span>;
 }
 
+function ContactUsSection() {
+  const { t } = useTranslation();
+  return null;
+}
+
 const Home = () => {
   const { t } = useTranslation();
   const [showLearnMore, setShowLearnMore] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState('');
+  const navigate = useNavigate();
+
+  const faqs = [
+    {
+      question: t('home.faq.q1'),
+      answer: t('home.faq.a1')
+    },
+    {
+      question: t('home.faq.q2'),
+      answer: t('home.faq.a2')
+    },
+    {
+      question: t('home.faq.q3'),
+      answer: t('home.faq.a3')
+    },
+    {
+      question: t('home.faq.q4'),
+      answer: t('home.faq.a4')
+    },
+    {
+      question: t('home.faq.q5'),
+      answer: t('home.faq.a5')
+    },
+  ];
 
   // Animation variants
   const container = {
@@ -101,6 +107,17 @@ const Home = () => {
   const item = {
     hidden: { y: 20, opacity: 0 },
     show: { y: 0, opacity: 1 }
+  };
+
+  // FAQ open/close state
+  const [openFaqs, setOpenFaqs] = useState(Array(faqs.length).fill(false));
+  const handleToggleFaq = (idx: number) => {
+    setOpenFaqs((prev) => prev.map((open, i) => (i === idx ? !open : open)));
+  };
+
+  const handleDropdownSelect = (path: string) => {
+    setDropdownOpen('');
+    navigate(path);
   };
 
   return (
@@ -133,6 +150,82 @@ const Home = () => {
           />
         </div>
       </section>
+
+      {/* Employer & Worker Tools Dropdowns */}
+      <div className="container mx-auto px-4 mb-12 flex justify-center items-center gap-8">
+        {/* Employer Tools Dropdown */}
+        <div className="relative inline-block">
+          <button
+            onClick={() => setDropdownOpen(dropdownOpen === 'employer' ? '' : 'employer')}
+            className="flex items-center space-x-3 px-10 py-5 bg-blue-600 text-white rounded-xl text-lg font-semibold hover:bg-blue-700 transition-colors shadow-2xl min-w-[220px]"
+            style={{ fontSize: '1.25rem' }}
+          >
+            <span className="font-semibold">Employer Tools</span>
+            <ChevronDown className={`h-7 w-7 transition-transform ${dropdownOpen === 'employer' ? 'rotate-180' : ''}`} />
+          </button>
+          {dropdownOpen === 'employer' && (
+            <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl py-2 z-50 border border-gray-100">
+              <button
+                onClick={() => handleDropdownSelect('/employer-dashboard')}
+                className="block w-full text-left px-5 py-4 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-base"
+              >
+                Employer Profile
+              </button>
+              <button
+                onClick={() => handleDropdownSelect('/mass-hiring-demo')}
+                className="block w-full text-left px-5 py-4 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-base"
+              >
+                Mass Hiring Tool
+              </button>
+              <button
+                onClick={() => handleDropdownSelect('/analytics-demo')}
+                className="block w-full text-left px-5 py-4 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-base"
+              >
+                Analytics Dashboard
+              </button>
+              <button
+                onClick={() => handleDropdownSelect('/messaging-demo')}
+                className="block w-full text-left px-5 py-4 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-base"
+              >
+                Messaging/Notifications
+              </button>
+            </div>
+          )}
+        </div>
+        {/* Worker Tools Dropdown */}
+        <div className="relative inline-block">
+          <button
+            onClick={() => setDropdownOpen(dropdownOpen === 'worker' ? '' : 'worker')}
+            className="flex items-center space-x-3 px-10 py-5 bg-green-600 text-white rounded-xl text-lg font-semibold hover:bg-green-700 transition-colors shadow-2xl min-w-[220px]"
+            style={{ fontSize: '1.25rem' }}
+          >
+            <span className="font-semibold">Worker Tools</span>
+            <ChevronDown className={`h-7 w-7 transition-transform ${dropdownOpen === 'worker' ? 'rotate-180' : ''}`} />
+          </button>
+          {dropdownOpen === 'worker' && (
+            <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl py-2 z-50 border border-gray-100">
+              <button
+                onClick={() => handleDropdownSelect('/temporary-worker-profile')}
+                className="block w-full text-left px-5 py-4 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors text-base"
+              >
+                Worker Profile
+              </button>
+              <button
+                onClick={() => handleDropdownSelect('/worker-dashboard')}
+                className="block w-full text-left px-5 py-4 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors text-base"
+              >
+                Worker Dashboard
+              </button>
+              <button
+                onClick={() => handleDropdownSelect('/browse-workers')}
+                className="block w-full text-left px-5 py-4 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors text-base"
+              >
+                Find Jobs
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
       
       {/* Trust & Professionalism Section */}
       <section className="py-16 bg-gradient-to-b from-white to-blue-50">
@@ -427,28 +520,28 @@ const Home = () => {
         <div className="container mx-auto px-4 max-w-3xl">
           <h2 className="text-3xl font-bold text-center mb-10">Frequently Asked Questions</h2>
           <div className="space-y-4">
-            {faqs.map((faq, idx) => {
-              const [open, setOpen] = useState(false);
-              return (
-                <div key={idx} className="border border-gray-200 rounded-xl bg-gray-50">
-                  <button
-                    className="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none"
-                    onClick={() => setOpen((prev) => !prev)}
-                  >
-                    <span className="font-semibold text-lg text-gray-900">{faq.question}</span>
-                    <ChevronDown className={`h-5 w-5 text-blue-600 transition-transform ${open ? 'rotate-180' : ''}`} />
-                  </button>
-                  {open && (
-                    <div className="px-6 pb-4 text-gray-700 animate-fade-in">
-                      {faq.answer}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="border border-gray-200 rounded-xl bg-gray-50">
+                <button
+                  className="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none"
+                  onClick={() => handleToggleFaq(idx)}
+                >
+                  <span className="font-semibold text-lg text-gray-900">{faq.question}</span>
+                  <ChevronDown className={`h-5 w-5 text-blue-600 transition-transform ${openFaqs[idx] ? 'rotate-180' : ''}`} />
+                </button>
+                {openFaqs[idx] && (
+                  <div className="px-6 pb-4 text-gray-700 animate-fade-in">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
+
+      {/* Contact Us Section */}
+      <ContactUsSection />
 
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">

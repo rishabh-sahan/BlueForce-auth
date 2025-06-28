@@ -16,23 +16,42 @@ import {
   Building,
   Award
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../client';
 
 const UserProfilePage: React.FC = () => {
   const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<'profile' | 'jobs' | 'bookings'>('profile');
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (currentUser) {
-      setProfile(currentUser);
-    }
+    const fetchProfiles = async () => {
+      if (!currentUser) return;
+      // Fetch all profiles for this user (worker and employer)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', currentUser.email);
+      console.log('Fetched profiles from Supabase:', data, 'Error:', error);
+      if (data && data.length > 0) {
+        setProfiles(data);
+        setSelectedProfile(data[0]);
+      } else {
+        setProfiles([]);
+        setSelectedProfile(null);
+      }
+    };
+    fetchProfiles();
   }, [currentUser]);
 
-  if (!profile) {
+  if (!selectedProfile) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-gray-600">No profile found. Please create a profile.</p>
       </div>
     );
   }
@@ -43,7 +62,7 @@ const UserProfilePage: React.FC = () => {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <img
-              src={profile.profileImage || 'https://via.placeholder.com/150'}
+              src={selectedProfile.profileImage || selectedProfile.profile_photo || 'https://via.placeholder.com/150'}
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-4 border-blue-100"
             />
@@ -56,15 +75,47 @@ const UserProfilePage: React.FC = () => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {profile.firstName} {profile.lastName}
+              {selectedProfile.firstName || selectedProfile.full_name || ''} {selectedProfile.lastName || ''}
             </h2>
-            <p className="text-gray-600">{profile.email}</p>
+            <p className="text-gray-600">{selectedProfile.email}</p>
             <div className="flex items-center mt-2">
               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                {profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
+                {(selectedProfile.type || selectedProfile.role || '').charAt(0).toUpperCase() + (selectedProfile.type || selectedProfile.role || '').slice(1)}
               </span>
             </div>
           </div>
+        </div>
+        <div>
+          {profiles.length > 1 && (
+            <select
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+              value={selectedProfile.type || selectedProfile.role}
+              onChange={e => {
+                const newProfile = profiles.find(p => (p.type || p.role) === e.target.value);
+                if (newProfile) setSelectedProfile(newProfile);
+              }}
+            >
+              {profiles.map((p, idx) => (
+                <option key={idx} value={p.type || p.role}>
+                  Switch to {(p.type || p.role).charAt(0).toUpperCase() + (p.type || p.role).slice(1)} Profile
+                </option>
+              ))}
+            </select>
+          )}
+          {profiles.length === 1 && (
+            <button
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+              onClick={() => {
+                if ((selectedProfile.type || selectedProfile.role) === 'worker') {
+                  navigate('/employer-profile');
+                } else {
+                  navigate('/individual-profile');
+                }
+              }}
+            >
+              Switch to {(selectedProfile.type || selectedProfile.role) === 'worker' ? 'Employer' : 'Worker'} Profile
+            </button>
+          )}
         </div>
       </div>
 
@@ -72,19 +123,19 @@ const UserProfilePage: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center space-x-3">
             <Phone className="text-blue-600" size={20} />
-            <span className="text-gray-700">{profile.phoneNumber}</span>
+            <span className="text-gray-700">{selectedProfile.phoneNumber}</span>
           </div>
           <div className="flex items-center space-x-3">
             <Mail className="text-blue-600" size={20} />
-            <span className="text-gray-700">{profile.email}</span>
+            <span className="text-gray-700">{selectedProfile.email}</span>
           </div>
-          {profile.role === 'worker' && (profile as WorkerProfile).skills && (
+          {selectedProfile.role === 'worker' && (selectedProfile as WorkerProfile).skills && (
             <div className="flex items-start space-x-3">
               <Award className="text-blue-600 mt-1" size={20} />
               <div>
                 <span className="text-gray-700 font-medium">Skills:</span>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {(profile as WorkerProfile).skills.map((skill, index) => (
+                  {(selectedProfile as WorkerProfile).skills.map((skill, index) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
@@ -96,51 +147,51 @@ const UserProfilePage: React.FC = () => {
               </div>
             </div>
           )}
-          {profile.role === 'employer' && (profile as EmployerProfile).companyName && (
+          {selectedProfile.role === 'employer' && (selectedProfile as EmployerProfile).companyName && (
             <div className="flex items-center space-x-3">
               <Building className="text-blue-600" size={20} />
               <span className="text-gray-700">
-                {(profile as EmployerProfile).companyName}
+                {(selectedProfile as EmployerProfile).companyName}
               </span>
             </div>
           )}
         </div>
 
         <div className="space-y-4">
-          {profile.role === 'worker' && (
+          {selectedProfile.role === 'worker' && (
             <>
               <div className="flex items-center space-x-3">
                 <Star className="text-blue-600" size={20} />
                 <span className="text-gray-700">
-                  Rating: {(profile as WorkerProfile).rating || 0}/5
+                  Rating: {(selectedProfile as WorkerProfile).rating || 0}/5
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <Briefcase className="text-blue-600" size={20} />
                 <span className="text-gray-700">
-                  Experience: {(profile as WorkerProfile).experience || 0} years
+                  Experience: {(selectedProfile as WorkerProfile).experience || 0} years
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <Clock className="text-blue-600" size={20} />
                 <span className="text-gray-700">
-                  Completed Jobs: {(profile as WorkerProfile).completedJobs || 0}
+                  Completed Jobs: {(selectedProfile as WorkerProfile).completedJobs || 0}
                 </span>
               </div>
             </>
           )}
-          {profile.role === 'employer' && (
+          {selectedProfile.role === 'employer' && (
             <>
               <div className="flex items-center space-x-3">
                 <Users className="text-blue-600" size={20} />
                 <span className="text-gray-700">
-                  Company Size: {(profile as EmployerProfile).companySize}
+                  Company Size: {(selectedProfile as EmployerProfile).companySize}
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <Briefcase className="text-blue-600" size={20} />
                 <span className="text-gray-700">
-                  Industry: {(profile as EmployerProfile).industry}
+                  Industry: {(selectedProfile as EmployerProfile).industry}
                 </span>
               </div>
             </>
@@ -151,7 +202,7 @@ const UserProfilePage: React.FC = () => {
   );
 
   const renderJobsSection = () => {
-    if (profile.role === 'worker') {
+    if (selectedProfile.role === 'worker') {
       return (
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-xl font-bold mb-4">Available Jobs</h3>
@@ -161,7 +212,7 @@ const UserProfilePage: React.FC = () => {
           </div>
         </div>
       );
-    } else if (profile.role === 'employer') {
+    } else if (selectedProfile.role === 'employer') {
       return (
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-xl font-bold mb-4">Posted Jobs</h3>
@@ -179,7 +230,7 @@ const UserProfilePage: React.FC = () => {
   };
 
   const renderBookingsSection = () => {
-    if (profile.role === 'worker') {
+    if (selectedProfile.role === 'worker') {
       return (
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-xl font-bold mb-4">My Bookings</h3>
@@ -189,7 +240,7 @@ const UserProfilePage: React.FC = () => {
           </div>
         </div>
       );
-    } else if (profile.role === 'employer') {
+    } else if (selectedProfile.role === 'employer') {
       return (
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-xl font-bold mb-4">Worker Bookings</h3>
@@ -227,7 +278,7 @@ const UserProfilePage: React.FC = () => {
                   : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >
-              {profile.role === 'worker' ? 'Available Jobs' : 'Posted Jobs'}
+              {selectedProfile.role === 'worker' ? 'Available Jobs' : 'Posted Jobs'}
             </button>
             <button
               onClick={() => setActiveTab('bookings')}

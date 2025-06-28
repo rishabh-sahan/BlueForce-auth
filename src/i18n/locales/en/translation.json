@@ -15,7 +15,18 @@
     "privacy": "Privacy Policy",
     "terms": "Terms & Conditions",
     "faq": "FAQs",
-    "careers": "Careers"
+    "careers": "Careers",
+    "quickLinks": "Quick Links",
+    "legal": "Legal",
+    "subscribeTitle": "Subscribe to Our Newsletter",
+    "emailPlaceholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "subscribeNote": "Get updates on new jobs and opportunities",
+    "copyright": "All rights reserved.",
+    "tagline": "Empowering blue-collar workers and employers across India.",
+    "address": "123 Main Street, Bengaluru, India",
+    "phone": "+91 98765 43210",
+    "email": "info@blueforce.com"
   },
   "home": {
     "hero": {
@@ -63,6 +74,18 @@
       "accessibility": "Accessibility",
       "trust": "Trust",
       "empowerment": "Empowerment"
+    },
+    "faq": {
+      "q1": "How does BlueForce work?",
+      "a1": "BlueForce connects skilled workers with employers through a simple, secure platform. Workers create profiles, showcase their skills, and get hired for jobs that match their expertise.",
+      "q2": "Is BlueForce free to use?",
+      "a2": "Yes, BlueForce is completely free for workers. Employers pay a small fee only when they successfully hire a worker.",
+      "q3": "How do I get paid?",
+      "a3": "Payments are processed securely through our platform. Workers receive payments directly to their registered bank account after job completion.",
+      "q4": "What types of jobs are available?",
+      "a4": "We offer a wide range of blue-collar jobs including electricians, plumbers, carpenters, welders, painters, drivers, and many more.",
+      "q5": "How do I verify my skills?",
+      "a5": "You can verify your skills by uploading certificates, work samples, and completing skill assessments. This helps build trust with potential employers."
     }
   },
   "auth": {
@@ -93,5 +116,38 @@
       "step3": "Chat & hire",
       "step4": "Pay & review"
     }
+  },
+  "workerProfile": {
+    "title": "Complete Your Profile",
+    "subtitle": "Showcase your skills and experience to get hired",
+    "personalInfo": "Personal Information",
+    "professionalInfo": "Professional Information",
+    "uploadMedia": "Upload Media",
+    "verificationDocs": "Verification Documents",
+    "fullName": "Full Name",
+    "mobileNumber": "Mobile Number",
+    "currentLocation": "Current Location",
+    "bio": "Bio",
+    "primaryDomain": "Primary Domain",
+    "selectProfession": "Select your profession",
+    "workExperience": "Work Experience (years)",
+    "hourlyRate": "Hourly Rate (₹)",
+    "profilePhoto": "Profile Photo",
+    "uploadPhoto": "Upload Photo",
+    "skillVideos": "Skill Videos",
+    "uploadVideos": "Upload Videos",
+    "skillCertifications": "Skill Certifications",
+    "uploadCertificates": "Upload Certificates",
+    "governmentId": "Government ID",
+    "uploadIdDocuments": "Upload ID Documents",
+    "note": "Note:",
+    "noteText": "Your documents will be securely stored and only used for verification purposes.",
+    "back": "Back",
+    "next": "Next",
+    "submitting": "Submitting...",
+    "submitProfile": "Submit Profile"
+  },
+  "register": {
+    "fullName": "Full Name"
   }
 }

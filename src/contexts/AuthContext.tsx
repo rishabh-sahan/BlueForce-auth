@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { UserProfile, UserRole } from '../types/user';
+import { supabase } from '../client';
 
 interface AuthContextType {
   currentUser: UserProfile | null;
@@ -24,31 +25,95 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isMounted = React.useRef(true);
+
+  // Helper to fetch profile from Supabase and set currentUser
+  const fetchAndSetProfile = async (userId: string, fallbackUser?: any) => {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    if (profile && isMounted.current) {
+      setCurrentUser({
+        uid: profile.user_id,
+        email: profile.email,
+        role: profile.type || 'worker',
+        firstName: profile.full_name || '',
+        lastName: '',
+        phoneNumber: profile.mobile || '',
+        isApproved: true,
+        createdAt: profile.created_at ? new Date(profile.created_at) : new Date(),
+        updatedAt: profile.created_at ? new Date(profile.created_at) : new Date(),
+        companyName: profile.company_name,
+        skills: profile.skills,
+        experience: profile.experience,
+        rating: profile.rating,
+        bio: profile.bio,
+        profileImage: profile.profile_photo,
+      });
+    } else if (fallbackUser && isMounted.current) {
+      setCurrentUser({
+        uid: fallbackUser.id,
+        email: fallbackUser.email || '',
+        role: 'worker',
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        isApproved: true,
+        createdAt: fallbackUser.created_at ? new Date(fallbackUser.created_at) : new Date(),
+        updatedAt: fallbackUser.created_at ? new Date(fallbackUser.created_at) : new Date(),
+      });
+    } else if (isMounted.current) {
+      setCurrentUser(null);
+    }
+  };
+
+  React.useEffect(() => {
+    isMounted.current = true;
+    // Check for existing Supabase session
+    const getSession = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user && isMounted.current) {
+        await fetchAndSetProfile(data.user.id, data.user);
+      } else if (isMounted.current) {
+        setCurrentUser(null);
+      }
+      setLoading(false);
+    };
+    getSession();
+    return () => { isMounted.current = false; };
+  }, []);
 
   const login = async (email: string, password: string) => {
+    setError(null);
+    setLoading(true);
     try {
-      setError(null);
-      setLoading(true);
-      // Implement your login logic here
-      setLoading(false);
+      const { user, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+      if (loginError) throw loginError;
+      if (user && isMounted.current) {
+        await fetchAndSetProfile(user.id, user);
+      }
     } catch (err: any) {
-      setError(err.message);
-      setLoading(false);
+      if (isMounted.current) setError(err.message);
       throw err;
+    } finally {
+      if (isMounted.current) setLoading(false);
     }
   };
 
   const logout = async () => {
+    setError(null);
+    setLoading(true);
     try {
-      setError(null);
-      setLoading(true);
-      // Implement your logout logic here
-      setCurrentUser(null);
-      setLoading(false);
+      await supabase.auth.signOut();
+      if (isMounted.current) setCurrentUser(null);
     } catch (err: any) {
-      setError(err.message);
-      setLoading(false);
+      if (isMounted.current) setError(err.message);
       throw err;
+    } finally {
+      if (isMounted.current) setLoading(false);
     }
   };
 
@@ -58,15 +123,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     role: UserRole,
     userData: Partial<UserProfile>
   ) => {
+    setError(null);
+    setLoading(true);
     try {
-      setError(null);
-      setLoading(true);
-      // Implement your registration logic here
-      setLoading(false);
+      const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
+      if (signUpError) throw signUpError;
+      if (data.user && isMounted.current) {
+        setCurrentUser({
+          uid: data.user.id,
+          email: data.user.email || '',
+          role,
+          firstName: userData.firstName || '',
+          lastName: userData.lastName || '',
+          phoneNumber: userData.phoneNumber || '',
+          isApproved: true,
+          createdAt: new Date(data.user.created_at),
+          updatedAt: new Date(data.user.created_at),
+        });
+      }
     } catch (err: any) {
-      setError(err.message);
-      setLoading(false);
+      if (isMounted.current) setError(err.message);
       throw err;
+    } finally {
+      if (isMounted.current) setLoading(false);
     }
   };
 

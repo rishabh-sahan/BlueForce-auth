@@ -85,36 +85,27 @@ const EmployerProfile = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
   
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
     try {
-      // Get current user
       const currentUser = getCurrentUser();
       if (!currentUser) {
         throw new Error('User not logged in');
       }
-      
-      // Update user profile
-      const updatedUser = updateUserProfile(currentUser.id, {
+
+      const updatedUser = await updateUserProfile(currentUser.id, {
         name: formData.companyName,
         type: 'employer',
         location: formData.location,
-        // In a real app, we would upload files to a storage service
-        // and save the URLs to the user profile
+        companyType: formData.businessType
       });
-      
+
       if (!updatedUser) {
         throw new Error('Failed to update profile');
       }
-      
-      setTimeout(() => {
-        setIsLoading(false);
-        // Show success message and redirect
-        alert('Profile submitted for verification! You will be notified once approved.');
-        navigate('/');
-      }, 1500);
+
+      navigate('/browse-workers');
     } catch (error) {
       setIsLoading(false);
       alert('Error creating profile: ' + (error as Error).message);

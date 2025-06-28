@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getCurrentUser, logoutUser } from '../../services/authService';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, Globe, LogOut, Menu, User, X } from 'lucide-react';
 
@@ -9,15 +9,11 @@ const Header = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { currentUser, logout } = useAuth();
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   
   useEffect(() => {
-    // Check if user is logged in
-    const user = getCurrentUser();
-    setIsLoggedIn(!!user);
-    
     // Load preferred language from localStorage safely
     try {
       const savedLang = localStorage.getItem('preferredLanguage');
@@ -39,9 +35,8 @@ const Header = () => {
     setIsLangDropdownOpen(false);
   };
   
-  const handleLogout = () => {
-    logoutUser();
-    setIsLoggedIn(false);
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
@@ -67,6 +62,9 @@ const Header = () => {
             <Link to="/how-it-works" className="text-white hover:text-blue-200 font-medium">
               {t('header.howItWorks')}
             </Link>
+            <li>
+              <a href="/browse-workers" className="hover:text-blue-600 transition-colors">Browse Workers</a>
+            </li>
           </nav>
           
           {/* Right side elements */}
@@ -78,27 +76,34 @@ const Header = () => {
                 className="flex items-center text-white hover:text-blue-200 focus:outline-none"
               >
                 <Globe size={18} className="mr-1" />
-                {i18n.language === 'hi' ? 'हिंदी' : 'English'}
+                {i18n.language === 'hi' ? 'हिंदी' : i18n.language === 'kn' ? 'ಕನ್ನಡ' : 'English'}
+                <ChevronDown className="ml-1 w-4 h-4" />
               </button>
               {isLangDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-md z-10">
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-10">
                   <button
                     onClick={() => changeLanguage('en')}
-                    className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm"
+                    className={`block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm flex items-center ${i18n.language === 'en' ? 'font-bold' : ''}`}
                   >
-                    English
+                    English {i18n.language === 'en' && <span className="ml-2">✓</span>}
                   </button>
                   <button
                     onClick={() => changeLanguage('hi')}
-                    className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm"
+                    className={`block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm flex items-center ${i18n.language === 'hi' ? 'font-bold' : ''}`}
                   >
-                    हिंदी
+                    हिंदी {i18n.language === 'hi' && <span className="ml-2">✓</span>}
+                  </button>
+                  <button
+                    onClick={() => changeLanguage('kn')}
+                    className={`block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm flex items-center ${i18n.language === 'kn' ? 'font-bold' : ''}`}
+                  >
+                    ಕನ್ನಡ {i18n.language === 'kn' && <span className="ml-2">✓</span>}
                   </button>
                 </div>
               )}
             </div>
 
-            {isLoggedIn ? (
+            {currentUser ? (
               <div className="relative">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -197,29 +202,36 @@ const Header = () => {
             </Link>
             
             {/* Language Options */}
-            <div className="flex flex-col space-y-2 border-t border-b py-2 my-2">
-              <div className="text-sm text-white opacity-75">Select Language:</div>
-              <button
-                onClick={() => {
-                  changeLanguage('en');
-                  setIsMenuOpen(false);
-                }}
-                className={`flex items-center text-white hover:text-blue-200 ${i18n.language === 'en' ? 'font-bold' : ''}`}
-              >
-                English {i18n.language === 'en' && '✓'}
-              </button>
-              <button
-                onClick={() => {
-                  changeLanguage('hi');
-                  setIsMenuOpen(false);
-                }}
-                className={`flex items-center text-white hover:text-blue-200 ${i18n.language === 'hi' ? 'font-bold' : ''}`}
-              >
-                हिंदी {i18n.language === 'hi' && '✓'}
-              </button>
-            </div>
+            <div className="text-sm text-white opacity-75 mb-2">Select Language:</div>
+            <button
+              onClick={() => {
+                changeLanguage('en');
+                setIsMenuOpen(false);
+              }}
+              className={`flex items-center text-white hover:text-blue-200 ${i18n.language === 'en' ? 'font-bold' : ''}`}
+            >
+              English {i18n.language === 'en' && <span className="ml-2">✓</span>}
+            </button>
+            <button
+              onClick={() => {
+                changeLanguage('hi');
+                setIsMenuOpen(false);
+              }}
+              className={`flex items-center text-white hover:text-blue-200 ${i18n.language === 'hi' ? 'font-bold' : ''}`}
+            >
+              हिंदी {i18n.language === 'hi' && <span className="ml-2">✓</span>}
+            </button>
+            <button
+              onClick={() => {
+                changeLanguage('kn');
+                setIsMenuOpen(false);
+              }}
+              className={`flex items-center text-white hover:text-blue-200 ${i18n.language === 'kn' ? 'font-bold' : ''}`}
+            >
+              ಕನ್ನಡ {i18n.language === 'kn' && <span className="ml-2">✓</span>}
+            </button>
 
-            {isLoggedIn ? (
+            {currentUser ? (
               <div className="flex flex-col space-y-2">
                 <Link
                   to="/profile"

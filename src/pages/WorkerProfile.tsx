@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Image as ImageIcon, Camera, CircleCheck, File, Loader, Upload, X, Shield } from 'lucide-react';
 import { updateUserProfile, getCurrentUser } from '../services/authService';
+import { useTranslation } from 'react-i18next';
 
 const professions = [
   'Electrician', 'Plumber', 'Carpenter', 'Welder', 'Painter', 
@@ -35,6 +36,8 @@ const WorkerProfile = () => {
   
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
+  
+  const { t } = useTranslation();
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -102,34 +105,24 @@ const WorkerProfile = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
     try {
-      // Get current user
       const currentUser = getCurrentUser();
       if (!currentUser) {
         throw new Error('User not logged in');
       }
-      
-      // Update user profile
-      const updatedUser = updateUserProfile(currentUser.id, {
+
+      const updatedUser = await updateUserProfile(currentUser.id, {
         name: formData.fullName,
         type: 'worker',
-        profession: formData.primaryDomain,
         location: formData.location,
-        // In a real app, we would upload files to a storage service
-        // and save the URLs to the user profile
+        profession: formData.primaryDomain
       });
-      
+
       if (!updatedUser) {
         throw new Error('Failed to update profile');
       }
-      
-      setTimeout(() => {
-        setIsLoading(false);
-        // Show success message and redirect
-        alert('Profile submitted for verification! You will be notified once approved.');
-        navigate('/');
-      }, 1500);
+
+      navigate('/worker-dashboard');
     } catch (error) {
       setIsLoading(false);
       alert('Error creating profile: ' + (error as Error).message);
@@ -142,11 +135,11 @@ const WorkerProfile = () => {
       case 1:
         return (
           <div>
-            <h3 className="text-xl font-semibold mb-6">Personal Information</h3>
+            <h3 className="text-xl font-semibold mb-6">{t('workerProfile.personalInfo')}</h3>
             
             <div className="space-y-4">
               <div>
-                <label htmlFor="fullName" className="block text-gray-700 font-medium mb-1">Full Name</label>
+                <label htmlFor="fullName" className="block text-gray-700 font-medium mb-1">{t('workerProfile.fullName')}</label>
                 <input
                   type="text"
                   id="fullName"
@@ -159,7 +152,7 @@ const WorkerProfile = () => {
               </div>
               
               <div>
-                <label htmlFor="mobile" className="block text-gray-700 font-medium mb-1">Mobile Number</label>
+                <label htmlFor="mobile" className="block text-gray-700 font-medium mb-1">{t('workerProfile.mobileNumber')}</label>
                 <input
                   type="tel"
                   id="mobile"
@@ -172,7 +165,7 @@ const WorkerProfile = () => {
               </div>
               
               <div>
-                <label htmlFor="location" className="block text-gray-700 font-medium mb-1">Current Location</label>
+                <label htmlFor="location" className="block text-gray-700 font-medium mb-1">{t('workerProfile.currentLocation')}</label>
                 <input
                   type="text"
                   id="location"
@@ -185,7 +178,7 @@ const WorkerProfile = () => {
               </div>
               
               <div>
-                <label htmlFor="bio" className="block text-gray-700 font-medium mb-1">Bio / About Yourself</label>
+                <label htmlFor="bio" className="block text-gray-700 font-medium mb-1">{t('workerProfile.bio')}</label>
                 <textarea
                   id="bio"
                   name="bio"
@@ -202,11 +195,11 @@ const WorkerProfile = () => {
       case 2:
         return (
           <div>
-            <h3 className="text-xl font-semibold mb-6">Professional Information</h3>
+            <h3 className="text-xl font-semibold mb-6">{t('workerProfile.professionalInfo')}</h3>
             
             <div className="space-y-4">
               <div>
-                <label htmlFor="primaryDomain" className="block text-gray-700 font-medium mb-1">Primary Domain</label>
+                <label htmlFor="primaryDomain" className="block text-gray-700 font-medium mb-1">{t('workerProfile.primaryDomain')}</label>
                 <select
                   id="primaryDomain"
                   name="primaryDomain"
@@ -215,7 +208,7 @@ const WorkerProfile = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="">Select your profession</option>
+                  <option value="">{t('workerProfile.selectProfession')}</option>
                   {professions.map((profession) => (
                     <option key={profession} value={profession}>{profession}</option>
                   ))}
@@ -223,7 +216,7 @@ const WorkerProfile = () => {
               </div>
               
               <div>
-                <label htmlFor="workExperience" className="block text-gray-700 font-medium mb-1">Work Experience (years)</label>
+                <label htmlFor="workExperience" className="block text-gray-700 font-medium mb-1">{t('workerProfile.workExperience')}</label>
                 <input
                   type="number"
                   id="workExperience"
@@ -238,7 +231,7 @@ const WorkerProfile = () => {
               </div>
               
               <div>
-                <label htmlFor="hourlyRate" className="block text-gray-700 font-medium mb-1">Hourly Rate (₹)</label>
+                <label htmlFor="hourlyRate" className="block text-gray-700 font-medium mb-1">{t('workerProfile.hourlyRate')}</label>
                 <input
                   type="number"
                   id="hourlyRate"
@@ -257,12 +250,12 @@ const WorkerProfile = () => {
       case 3:
         return (
           <div>
-            <h3 className="text-xl font-semibold mb-6">Upload Media</h3>
+            <h3 className="text-xl font-semibold mb-6">{t('workerProfile.uploadMedia')}</h3>
             
             <div className="space-y-6">
               {/* Profile Photo */}
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Profile Photo</label>
+                <label className="block text-gray-700 font-medium mb-2">{t('workerProfile.profilePhoto')}</label>
                 <div className="mt-1 flex items-center gap-5">
                   <div 
                     className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden"
@@ -279,7 +272,7 @@ const WorkerProfile = () => {
                     onClick={() => fileInputRef.current?.click()}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
-                    Upload Photo
+                    {t('workerProfile.uploadPhoto')}
                   </button>
                   <input
                     type="file"
@@ -293,7 +286,7 @@ const WorkerProfile = () => {
               
               {/* Skill Videos */}
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Skill Demonstration Videos</label>
+                <label className="block text-gray-700 font-medium mb-2">{t('workerProfile.skillVideos')}</label>
                 <div className="mt-1">
                   <button
                     type="button"
@@ -301,7 +294,7 @@ const WorkerProfile = () => {
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
                   >
                     <Upload className="mr-2 h-5 w-5" />
-                    Upload Videos
+                    {t('workerProfile.uploadVideos')}
                   </button>
                   <input
                     type="file"
@@ -340,12 +333,12 @@ const WorkerProfile = () => {
       case 4:
         return (
           <div>
-            <h3 className="text-xl font-semibold mb-6">Verification Documents</h3>
+            <h3 className="text-xl font-semibold mb-6">{t('workerProfile.verificationDocs')}</h3>
             
             <div className="space-y-6">
               {/* Certificates */}
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Skill Certifications (PDF/Image)</label>
+                <label className="block text-gray-700 font-medium mb-2">{t('workerProfile.skillCertifications')}</label>
                 <div className="mt-1">
                   <button
                     type="button"
@@ -353,7 +346,7 @@ const WorkerProfile = () => {
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
                   >
                     <File className="mr-2 h-5 w-5" />
-                    Upload Certificates
+                    {t('workerProfile.uploadCertificates')}
                   </button>
                   <input
                     type="file"
@@ -388,7 +381,7 @@ const WorkerProfile = () => {
               
               {/* Government ID */}
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Government ID (Aadhaar, PAN, etc.)</label>
+                <label className="block text-gray-700 font-medium mb-2">{t('workerProfile.governmentId')}</label>
                 <div className="mt-1">
                   <button
                     type="button"
@@ -396,7 +389,7 @@ const WorkerProfile = () => {
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
                   >
                     <Shield className="mr-2 h-5 w-5" />
-                    Upload ID Documents
+                    {t('workerProfile.uploadIdDocuments')}
                   </button>
                   <input
                     type="file"
@@ -430,7 +423,7 @@ const WorkerProfile = () => {
                 
                 <div className="mt-4 p-4 bg-blue-50 text-sm rounded-md">
                   <p className="text-blue-700">
-                    <strong>Note:</strong> Your documents are securely stored and only used for verification purposes. They will not be visible to others on the platform.
+                    <strong>{t('workerProfile.note')}</strong> {t('workerProfile.noteText')}
                   </p>
                 </div>
               </div>
@@ -448,8 +441,8 @@ const WorkerProfile = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
           <div className="bg-gradient-to-r from-blue-700 to-indigo-800 py-4 px-6">
-            <h2 className="text-2xl font-bold text-white">Worker Profile</h2>
-            <p className="text-blue-100 mt-1">Complete your profile to start getting job opportunities</p>
+            <h2 className="text-2xl font-bold text-white">{t('workerProfile.title')}</h2>
+            <p className="text-blue-100 mt-1">{t('workerProfile.subtitle')}</p>
           </div>
           
           <form onSubmit={handleSubmit} className="p-6">
@@ -493,7 +486,7 @@ const WorkerProfile = () => {
                 }`}
                 disabled={currentStep === 1}
               >
-                Back
+                {t('workerProfile.back')}
               </button>
               
               {currentStep < totalSteps ? (
@@ -502,7 +495,7 @@ const WorkerProfile = () => {
                   onClick={nextStep}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
-                  Next
+                  {t('workerProfile.next')}
                 </button>
               ) : (
                 <motion.button
@@ -515,10 +508,10 @@ const WorkerProfile = () => {
                   {isLoading ? (
                     <>
                       <Loader className="animate-spin mr-2 h-5 w-5" />
-                      Submitting...
+                      {t('workerProfile.submitting')}
                     </>
                   ) : (
-                    'Submit Profile'
+                    t('workerProfile.submitProfile')
                   )}
                 </motion.button>
               )}

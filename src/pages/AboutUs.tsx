@@ -56,6 +56,46 @@ const AboutUs = () => {
         </div>
       </section>
 
+      {/* Micro-Insurance Benefit Section */}
+      <div className="container mx-auto px-4 mb-12">
+        <motion.div
+          className="bg-blue-50 rounded-xl shadow flex flex-col md:flex-row items-center justify-between p-8 gap-8"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+        >
+          {/* Left: Text */}
+          <div className="flex-1 min-w-[260px]">
+            <h3 className="text-2xl font-bold text-blue-900 mb-3">Micro-Insurance Benefit</h3>
+            <p className="text-gray-700 mb-4">
+              We believe in protecting the workforce that builds our nation. That's why a portion of the one-time registration fee paid by workers (₹200) goes into providing them with basic micro-insurance coverage.
+            </p>
+            <div className="mb-3">
+              <span className="font-semibold">Coverage Includes:</span>
+              <ul className="list-disc pl-6 mt-2 text-gray-700">
+                <li>Accidental coverage up to ₹50,000</li>
+                <li>Hospitalization benefit of ₹500/day (up to 10 days/year)</li>
+                <li>Disability benefit</li>
+                <li>Work-related injury compensation</li>
+              </ul>
+            </div>
+            <p className="text-gray-700 mb-4">
+              This insurance is active for one year from the date of registration, providing workers with a safety net as they pursue job opportunities through our platform.
+            </p>
+            <button className="mt-2 px-5 py-2 bg-white border border-blue-600 text-blue-700 rounded-md font-medium hover:bg-blue-100 transition">Learn More About Pricing</button>
+          </div>
+          {/* Right: Icon and short desc */}
+          <div className="flex-1 flex flex-col items-center justify-center min-w-[220px]">
+            <div className="bg-white rounded-lg shadow p-8 flex flex-col items-center">
+              <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-blue-600 mb-3"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3l7 4v5c0 5.25-3.5 9.74-7 11-3.5-1.26-7-5.75-7-11V7l7-4z" /></svg>
+              <div className="text-lg font-semibold text-gray-900 mb-1">Micro-Insurance</div>
+              <div className="text-gray-600 text-center">Protection for workers at an affordable cost</div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
       {/* Our story */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">

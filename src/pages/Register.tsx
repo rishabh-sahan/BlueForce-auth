@@ -3,11 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { registerUser, getCurrentUser } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 
 const Register = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { register, loading, error } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -15,16 +16,11 @@ const Register = () => {
     confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     // Check if user is already logged in
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      navigate('/profile');
-    }
-  }, [navigate]);
+    // Remove dependency on navigate to avoid unnecessary rerenders
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,32 +30,23 @@ const Register = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      // handle error (could set local error state if needed)
       return;
     }
-    
-    setIsLoading(true);
-    setError('');
-
-    // Simulate registration process
-    setTimeout(() => {
-      try {
-        registerUser({
-          name: formData.name,
-          email: formData.email,
-        });
-        
-        setIsLoading(false);
-        navigate('/login');
-      } catch (err) {
-        setIsLoading(false);
-        setError((err as Error).message);
-      }
-    }, 800);
+    try {
+      await register(
+        formData.email,
+        formData.password,
+        'worker', // or let user pick role
+        { firstName: formData.name }
+      );
+      navigate('/login', { replace: true });
+    } catch (err) {
+      // error is handled by context
+    }
   };
 
   return (
@@ -83,7 +70,7 @@ const Register = () => {
             className="py-4 px-6"
           >
             <h2 className="text-2xl font-bold text-white">{t('auth.register')}</h2>
-            <p className="text-blue-100 mt-1 text-sm">Create your BlueForce account</p>
+            <p className="text-blue-100 mt-1 text-sm">{t('register.createAccount')}</p>
           </motion.div>
           
           <div className="p-6">
@@ -100,7 +87,7 @@ const Register = () => {
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label htmlFor="name" className="block text-gray-700 font-medium mb-2">
-                  Full Name
+                  {t('register.fullName')}
                 </label>
                 <motion.input
                   whileFocus={{ scale: 1.01 }}
@@ -184,11 +171,11 @@ const Register = () => {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 className={`w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md flex items-center justify-center ${
-                  isLoading ? 'opacity-70 cursor-not-allowed' : ''
+                  loading ? 'opacity-70 cursor-not-allowed' : ''
                 }`}
-                disabled={isLoading}
+                disabled={loading}
               >
-                {isLoading ? (
+                {loading ? (
                   <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -196,7 +183,7 @@ const Register = () => {
                 ) : (
                   <UserPlus className="h-5 w-5 mr-2" />
                 )}
-                {isLoading ? 'Registering...' : t('auth.register')}
+                {loading ? t('register.registering') : t('auth.register')}
               </motion.button>
             </form>
             

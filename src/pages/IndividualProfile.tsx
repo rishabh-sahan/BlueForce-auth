@@ -1,12 +1,14 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Camera, Loader, MapPin, Shield } from 'lucide-react';
-import { updateUserProfile, getCurrentUser } from '../services/authService';
+import { saveUserProfileToSupabase } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 
 const IndividualProfile = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { currentUser } = useAuth();
   
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -17,6 +19,23 @@ const IndividualProfile = () => {
   });
   
   const [profilePhoto, setProfilePhoto] = useState<string | ArrayBuffer | null>(null);
+  
+  useEffect(() => {
+    if (currentUser === null) {
+      const timeout = setTimeout(() => {
+        navigate('/login');
+      }, 1500);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentUser, navigate]);
+
+  if (!currentUser) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -37,39 +56,33 @@ const IndividualProfile = () => {
     reader.readAsDataURL(file);
   };
   
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
     try {
-      // Get current user
-      const currentUser = getCurrentUser();
       if (!currentUser) {
         throw new Error('User not logged in');
       }
-      
-      // Update user profile
-      const updatedUser = updateUserProfile(currentUser.id, {
-        name: formData.fullName,
-        type: 'worker',
+
+      // Save to Supabase
+      // user_id must match auth.uid() for RLS
+      const profileData = {
+        user_id: currentUser.uid, // must match auth.uid() for RLS
+        full_name: formData.fullName,
+        mobile: formData.mobile,
+        email: formData.email,
         location: formData.location,
-        // In a real app, we would upload files to a storage service
-        // and save the URLs to the user profile
-      });
-      
-      if (!updatedUser) {
-        throw new Error('Failed to update profile');
-      }
-      
-      setTimeout(() => {
-        setIsLoading(false);
-        // Show success message and redirect
-        alert('Profile submitted for verification! You will be notified once approved.');
-        navigate('/');
-      }, 1500);
-    } catch (error) {
+        type: 'worker',
+        profile_photo: profilePhoto || null,
+        // created_at is set by Supabase
+      };
+      await saveUserProfileToSupabase(profileData);
+
+      navigate('/browse-workers');
+    } catch (error: any) {
       setIsLoading(false);
-      alert('Error creating profile: ' + (error as Error).message);
+      console.error('Profile creation error:', error);
+      alert('Error creating profile: ' + (error?.message || JSON.stringify(error)));
     }
   };
   
