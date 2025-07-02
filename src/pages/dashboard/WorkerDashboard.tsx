@@ -1,34 +1,60 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useEffect, useState } from 'react';
 import { WorkerProfile } from '../../types/user';
 
 const WorkerDashboard = () => {
-  const { currentUser } = useAuth();
   const [profile, setProfile] = useState<WorkerProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'jobs' | 'profile' | 'earnings'>('overview');
 
-  if (!currentUser) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  // Simulate fetching profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        const mockData: WorkerProfile = {
+          uid: 'w1',
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'john@example.com',
+          phoneNumber: '9876543210',
+          role: 'worker',
+          profileImage: '',
+          isApproved: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          availability: { isAvailable: true },
+          skills: ['Plumbing', 'Painting', 'Electrician'],
+          rating: 4.6,
+          experience: 3,
+          completedJobs: 15,
+        };
+        setProfile(mockData);
+      } catch (err: any) {
+        setError('Failed to load profile: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const updateAvailability = async (isAvailable: boolean) => {
     try {
       setLoading(true);
-      // Implement your availability update logic here
-      setLoading(false);
+      // Simulate availability toggle
+      if (profile) {
+        setProfile({ ...profile, availability: { isAvailable } });
+      }
     } catch (err: any) {
       setError('Failed to update availability: ' + err.message);
+    } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
+  if (loading || !profile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -41,19 +67,17 @@ const WorkerDashboard = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Worker Dashboard</h1>
         <button
-          onClick={() => updateAvailability(!profile?.availability.isAvailable)}
+          onClick={() => updateAvailability(!profile.availability.isAvailable)}
           className={`px-4 py-2 rounded-lg ${
-            profile?.availability.isAvailable
-              ? 'bg-green-600 hover:bg-green-700'
-              : 'bg-red-600 hover:bg-red-700'
+            profile.availability.isAvailable ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
           } text-white`}
         >
-          {profile?.availability.isAvailable ? 'Available' : 'Not Available'}
+          {profile.availability.isAvailable ? 'Available' : 'Not Available'}
         </button>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
+        <div className="bg-red-100 text-red-700 p-4 rounded mb-6">
           {error}
         </div>
       )}
@@ -64,7 +88,7 @@ const WorkerDashboard = () => {
           {['overview', 'jobs', 'profile', 'earnings'].map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setActiveTab(tab as typeof activeTab)}
               className={`${
                 activeTab === tab
                   ? 'border-blue-500 text-blue-600'
@@ -83,15 +107,15 @@ const WorkerDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-blue-50 p-6 rounded-lg">
               <h3 className="text-lg font-semibold text-blue-900 mb-2">Completed Jobs</h3>
-              <p className="text-3xl font-bold text-blue-600">{profile?.completedJobs || 0}</p>
+              <p className="text-3xl font-bold text-blue-600">{profile.completedJobs}</p>
             </div>
             <div className="bg-green-50 p-6 rounded-lg">
               <h3 className="text-lg font-semibold text-green-900 mb-2">Rating</h3>
-              <p className="text-3xl font-bold text-green-600">{profile?.rating || 0}/5.0</p>
+              <p className="text-3xl font-bold text-green-600">{profile.rating}/5.0</p>
             </div>
             <div className="bg-purple-50 p-6 rounded-lg">
               <h3 className="text-lg font-semibold text-purple-900 mb-2">Experience</h3>
-              <p className="text-3xl font-bold text-purple-600">{profile?.experience || 0} years</p>
+              <p className="text-3xl font-bold text-purple-600">{profile.experience} years</p>
             </div>
           </div>
         )}
@@ -110,7 +134,7 @@ const WorkerDashboard = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700">Skills</label>
                 <div className="mt-1 flex flex-wrap gap-2">
-                  {profile?.skills.map((skill, index) => (
+                  {profile.skills.map((skill, index) => (
                     <span
                       key={index}
                       className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
@@ -122,11 +146,11 @@ const WorkerDashboard = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Experience</label>
-                <p className="mt-1 text-gray-900">{profile?.experience} years</p>
+                <p className="mt-1 text-gray-900">{profile.experience} years</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Rating</label>
-                <p className="mt-1 text-gray-900">{profile?.rating}/5.0</p>
+                <p className="mt-1 text-gray-900">{profile.rating}/5.0</p>
               </div>
             </div>
           </div>
@@ -143,4 +167,4 @@ const WorkerDashboard = () => {
   );
 };
 
-export default WorkerDashboard; 
+export default WorkerDashboard;

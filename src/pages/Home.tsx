@@ -1,7 +1,6 @@
-import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, Shield, Users, ChevronDown, ThumbsUp, X, MapPin, Star, User } from 'lucide-react';
+import { Clock, Shield, Users, ChevronDown, ThumbsUp, X } from 'lucide-react';
 import ImageSlider from '../components/home/ImageSlider';
 import FeatureScroll from '../components/home/FeatureScroll';
 import TestimonialScroll from '../components/home/TestimonialScroll';
@@ -60,36 +59,34 @@ function AnimatedCounter({ value, duration = 1200, className = '' }: { value: nu
 }
 
 function ContactUsSection() {
-  const { t } = useTranslation();
   return null;
 }
 
 const Home = () => {
-  const { t } = useTranslation();
   const [showLearnMore, setShowLearnMore] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState('');
   const navigate = useNavigate();
 
   const faqs = [
     {
-      question: t('home.faq.q1'),
-      answer: t('home.faq.a1')
+      question: 'home.faq.q1',
+      answer: 'home.faq.a1'
     },
     {
-      question: t('home.faq.q2'),
-      answer: t('home.faq.a2')
+      question: 'home.faq.q2',
+      answer: 'home.faq.a2'
     },
     {
-      question: t('home.faq.q3'),
-      answer: t('home.faq.a3')
+      question: 'home.faq.q3',
+      answer: 'home.faq.a3'
     },
     {
-      question: t('home.faq.q4'),
-      answer: t('home.faq.a4')
+      question: 'home.faq.q4',
+      answer: 'home.faq.a4'
     },
     {
-      question: t('home.faq.q5'),
-      answer: t('home.faq.a5')
+      question: 'home.faq.q5',
+      answer: 'home.faq.a5'
     },
   ];
 
@@ -440,7 +437,7 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {t('home.whyUs.title')}
+            home.whyUs.title
           </motion.h2>
           <motion.div 
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
@@ -460,7 +457,7 @@ const Home = () => {
               >
                 <Shield className="w-8 h-8 text-blue-600" />
               </motion.div>
-              <h3 className="text-xl font-semibold mb-2">{t('home.whyUs.value')}</h3>
+              <h3 className="text-xl font-semibold mb-2">home.whyUs.value</h3>
               <p className="text-gray-600">Fair pricing and transparent fee structure for all users.</p>
             </motion.div>
             
@@ -476,7 +473,7 @@ const Home = () => {
               >
                 <Users className="w-8 h-8 text-blue-600" />
               </motion.div>
-              <h3 className="text-xl font-semibold mb-2">{t('home.whyUs.accessibility')}</h3>
+              <h3 className="text-xl font-semibold mb-2">home.whyUs.accessibility</h3>
               <p className="text-gray-600">Multiple languages and intuitive design for all users.</p>
             </motion.div>
             
@@ -492,7 +489,7 @@ const Home = () => {
               >
                 <Shield className="w-8 h-8 text-blue-600" />
               </motion.div>
-              <h3 className="text-xl font-semibold mb-2">{t('home.whyUs.trust')}</h3>
+              <h3 className="text-xl font-semibold mb-2">home.whyUs.trust</h3>
               <p className="text-gray-600">Verified workers and secure payment system built on trust.</p>
             </motion.div>
             
@@ -508,7 +505,7 @@ const Home = () => {
               >
                 <Clock className="w-8 h-8 text-blue-600" />
               </motion.div>
-              <h3 className="text-xl font-semibold mb-2">{t('home.whyUs.empowerment')}</h3>
+              <h3 className="text-xl font-semibold mb-2">home.whyUs.empowerment</h3>
               <p className="text-gray-600">Empowering workers with better opportunities and growth.</p>
             </motion.div>
           </motion.div>
