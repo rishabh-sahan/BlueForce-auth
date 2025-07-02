@@ -90,10 +90,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     setLoading(true);
     try {
-      const { user, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
       if (loginError) throw loginError;
-      if (user && isMounted.current) {
-        await fetchAndSetProfile(user.id, user);
+      if (data?.user && isMounted.current) {
+        await fetchAndSetProfile(data.user.id, data.user);
       }
     } catch (err: any) {
       if (isMounted.current) setError(err.message);
