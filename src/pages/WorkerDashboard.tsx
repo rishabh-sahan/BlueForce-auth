@@ -15,7 +15,7 @@ type NearbyJob = {
 
 const WorkerDashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(getCurrentUser());
+  const [user] = useState(getCurrentUser());
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isAvailable, setIsAvailable] = useState(() => {
     const stored = localStorage.getItem('workerAvailability');
