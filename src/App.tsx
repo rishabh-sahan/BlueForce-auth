@@ -25,7 +25,6 @@ import AnalyticsDemo from './pages/AnalyticsDemo';
 import MessagingDemo from './pages/MessagingDemo';
 import TemporaryEmployerProfile from './pages/TemporaryEmployerProfile';
 import TemporaryWorkerProfile from './pages/TemporaryWorkerProfile';
-import {supabase} from './client';
 
 // Admin pages
 import AdminLogin from './pages/admin/AdminLogin';
