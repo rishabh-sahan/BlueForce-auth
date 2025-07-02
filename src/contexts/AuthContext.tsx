@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { UserProfile, UserRole } from '../types/user';
 import { supabase } from '../client';
 
@@ -8,7 +8,12 @@ interface AuthContextType {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (email: string, password: string, role: UserRole, userData: Partial<UserProfile>) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    role: UserRole,
+    userData: Partial<UserProfile>
+  ) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,15 +30,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const isMounted = React.useRef(true);
+  const isMounted = useRef(true);
 
-  // Helper to fetch profile from Supabase and set currentUser
   const fetchAndSetProfile = async (userId: string, fallbackUser?: any) => {
-    const { data: profile, error } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('*')
       .eq('user_id', userId)
       .single();
+
     if (profile && isMounted.current) {
       setCurrentUser({
         uid: profile.user_id,
@@ -69,21 +74,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     isMounted.current = true;
-    // Check for existing Supabase session
+
     const getSession = async () => {
       setLoading(true);
-      const { data, error } = await supabase.auth.getUser();
-      if (data?.user && isMounted.current) {
-        await fetchAndSetProfile(data.user.id, data.user);
+      const { data } = await supabase.auth.getUser();
+      const user = data?.user;
+      if (user && isMounted.current) {
+        await fetchAndSetProfile(user.id, user);
       } else if (isMounted.current) {
         setCurrentUser(null);
       }
       setLoading(false);
     };
+
     getSession();
-    return () => { isMounted.current = false; };
+
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -128,17 +138,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
       if (signUpError) throw signUpError;
-      if (data.user && isMounted.current) {
+
+      const user = data?.user;
+      if (user && isMounted.current) {
         setCurrentUser({
-          uid: data.user.id,
-          email: data.user.email || '',
+          uid: user.id,
+          email: user.email || '',
           role,
           firstName: userData.firstName || '',
           lastName: userData.lastName || '',
           phoneNumber: userData.phoneNumber || '',
           isApproved: true,
-          createdAt: new Date(data.user.created_at),
-          updatedAt: new Date(data.user.created_at),
+          createdAt: new Date(user.created_at),
+          updatedAt: new Date(user.created_at),
         });
       }
     } catch (err: any) {
@@ -155,12 +167,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     error,
     login,
     logout,
-    register
+    register,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-}; 
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

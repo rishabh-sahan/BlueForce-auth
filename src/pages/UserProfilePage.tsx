@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { UserProfile, WorkerProfile, EmployerProfile } from '../types/user';
 import { motion } from 'framer-motion';
@@ -19,7 +19,7 @@ const UserProfilePage: React.FC = () => {
   const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<'profile' | 'jobs' | 'bookings'>('profile');
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isEditing, setIsEditing] = useState(false); // ✅ Fixed line
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -41,7 +41,7 @@ const UserProfilePage: React.FC = () => {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <img
-              src={profile.profileImage || 'https://via.placeholder.com/150'}
+              src={(profile as WorkerProfile | EmployerProfile).profileImage || 'https://via.placeholder.com/150'}
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-4 border-blue-100"
             />
@@ -77,13 +77,13 @@ const UserProfilePage: React.FC = () => {
             <span className="text-gray-700">{profile.email || 'N/A'}</span>
           </div>
 
-          {profile.role === 'worker' && (profile as WorkerProfile).skills && (
+          {'skills' in profile && profile.skills && (
             <div className="flex items-start space-x-3">
               <Award className="text-blue-600 mt-1" size={20} />
               <div>
                 <span className="text-gray-700 font-medium">Skills:</span>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {(profile as WorkerProfile).skills.map((skill, index) => (
+                  {profile.skills.map((skill, index) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
@@ -96,55 +96,54 @@ const UserProfilePage: React.FC = () => {
             </div>
           )}
 
-          {profile.role === 'employer' && (profile as EmployerProfile).companyName && (
+          {'companyName' in profile && profile.companyName && (
             <div className="flex items-center space-x-3">
               <Building className="text-blue-600" size={20} />
-              <span className="text-gray-700">
-                {(profile as EmployerProfile).companyName}
-              </span>
+              <span className="text-gray-700">{profile.companyName}</span>
             </div>
           )}
         </div>
 
         <div className="space-y-4">
-          {profile.role === 'worker' && (
-            <>
-              <div className="flex items-center space-x-3">
-                <Star className="text-blue-600" size={20} />
-                <span className="text-gray-700">
-                  Rating: {(profile as WorkerProfile).rating ?? 0}/5
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Briefcase className="text-blue-600" size={20} />
-                <span className="text-gray-700">
-                  Experience: {(profile as WorkerProfile).experience ?? 0} years
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Clock className="text-blue-600" size={20} />
-                <span className="text-gray-700">
-                  Completed Jobs: {(profile as WorkerProfile).completedJobs ?? 0}
-                </span>
-              </div>
-            </>
+          {'rating' in profile && (
+            <div className="flex items-center space-x-3">
+              <Star className="text-blue-600" size={20} />
+              <span className="text-gray-700">
+                Rating: {profile.rating ?? 0}/5
+              </span>
+            </div>
           )}
-
-          {profile.role === 'employer' && (
-            <>
-              <div className="flex items-center space-x-3">
-                <Users className="text-blue-600" size={20} />
-                <span className="text-gray-700">
-                  Company Size: {(profile as EmployerProfile).companySize || 'N/A'}
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Briefcase className="text-blue-600" size={20} />
-                <span className="text-gray-700">
-                  Industry: {(profile as EmployerProfile).industry || 'N/A'}
-                </span>
-              </div>
-            </>
+          {'experience' in profile && (
+            <div className="flex items-center space-x-3">
+              <Briefcase className="text-blue-600" size={20} />
+              <span className="text-gray-700">
+                Experience: {profile.experience ?? 0} years
+              </span>
+            </div>
+          )}
+          {'completedJobs' in profile && (
+            <div className="flex items-center space-x-3">
+              <Clock className="text-blue-600" size={20} />
+              <span className="text-gray-700">
+                Completed Jobs: {profile.completedJobs ?? 0}
+              </span>
+            </div>
+          )}
+          {'companySize' in profile && (
+            <div className="flex items-center space-x-3">
+              <Users className="text-blue-600" size={20} />
+              <span className="text-gray-700">
+                Company Size: {profile.companySize || 'N/A'}
+              </span>
+            </div>
+          )}
+          {'industry' in profile && (
+            <div className="flex items-center space-x-3">
+              <Briefcase className="text-blue-600" size={20} />
+              <span className="text-gray-700">
+                Industry: {profile.industry || 'N/A'}
+              </span>
+            </div>
           )}
         </div>
       </div>
@@ -161,9 +160,7 @@ const UserProfilePage: React.FC = () => {
           Post New Job
         </button>
       )}
-      <div className="space-y-4">
-        <p className="text-gray-600">No jobs available at the moment.</p>
-      </div>
+      <p className="text-gray-600">No jobs available at the moment.</p>
     </div>
   );
 
@@ -172,53 +169,49 @@ const UserProfilePage: React.FC = () => {
       <h3 className="text-xl font-bold mb-4">
         {profile.role === 'worker' ? 'My Bookings' : 'Worker Bookings'}
       </h3>
-      <div className="space-y-4">
-        <p className="text-gray-600">No bookings yet.</p>
-      </div>
+      <p className="text-gray-600">No bookings yet.</p>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Tabs */}
-          <div className="flex space-x-4 mb-6">
-            {['profile', 'jobs', 'bookings'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab as any)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  activeTab === tab
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {tab === 'profile'
-                  ? 'Profile'
-                  : tab === 'jobs'
-                  ? profile.role === 'worker'
-                    ? 'Available Jobs'
-                    : 'Posted Jobs'
-                  : 'Bookings'}
-              </button>
-            ))}
-          </div>
-
-          {/* Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {activeTab === 'profile' && renderProfileSection()}
-            {activeTab === 'jobs' && renderJobsSection()}
-            {activeTab === 'bookings' && renderBookingsSection()}
-          </motion.div>
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Tabs */}
+        <div className="flex space-x-4 mb-6">
+          {['profile', 'jobs', 'bookings'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab as any)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === tab
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {tab === 'profile'
+                ? 'Profile'
+                : tab === 'jobs'
+                ? profile.role === 'worker'
+                  ? 'Available Jobs'
+                  : 'Posted Jobs'
+                : 'Bookings'}
+            </button>
+          ))}
         </div>
+
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {activeTab === 'profile' && renderProfileSection()}
+          {activeTab === 'jobs' && renderJobsSection()}
+          {activeTab === 'bookings' && renderBookingsSection()}
+        </motion.div>
       </div>
 
-      {/* Edit Modal (Placeholder) */}
+      {/* Edit Modal */}
       {isEditing && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-xl w-full max-w-lg relative shadow-xl">
