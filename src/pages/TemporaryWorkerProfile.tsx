@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   User,
@@ -8,7 +8,7 @@ import {
   Star,
   Search,
   FileText,
-  BarChart2,
+  // BarChart2,
   MessageSquare,
   CheckCircle,
   AlertCircle
@@ -16,7 +16,7 @@ import {
 import { getCurrentUser } from '../services/authService';
 
 const TemporaryWorkerProfile = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [videoUrl, setVideoUrl] = useState(() => localStorage.getItem('workerSkillVideo') || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
