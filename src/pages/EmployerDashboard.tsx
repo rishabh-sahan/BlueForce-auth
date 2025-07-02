@@ -30,7 +30,7 @@ const mockWorkers = [
 
 const EmployerDashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(getCurrentUser());
+  const [user] = useState(getCurrentUser());
   const [selected, setSelected] = useState<number[]>([]);
   const [allBooked, setAllBooked] = useState(false);
   const [hiredWorkers, setHiredWorkers] = useState<typeof mockWorkers>([]);
