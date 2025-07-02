@@ -2,10 +2,12 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { initializeUsers } from './services/authService';
-import './i18n/i18n'; // Import i18n configuration
+import './i18n/i18n';
 import './index.css';
+
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+
 import Home from './pages/Home';
 import HowItWorks from './pages/HowItWorks';
 import Login from './pages/Login';
@@ -31,28 +33,27 @@ import AdminLogin from './pages/admin/AdminLogin';
 import Dashboard from './pages/admin/Dashboard';
 import UserManagement from './pages/admin/UserManagement';
 import AdminLayout from './pages/admin/AdminLayout';
+
 import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Add Google Fonts
     const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap';
+    link.href =
+      'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
-    
-    // Initialize users data
+
     try {
       initializeUsers();
     } catch (error) {
       console.warn('Could not initialize users:', error);
     }
-    
-    // Indicate that the app is ready
+
     setIsLoading(false);
-    
+
     return () => {
       try {
         document.head.removeChild(link);
@@ -94,7 +95,7 @@ function App() {
                 <Route path="/messaging-demo" element={<MessagingDemo />} />
                 <Route path="/temporary-employer-profile" element={<TemporaryEmployerProfile />} />
                 <Route path="/temporary-worker-profile" element={<TemporaryWorkerProfile />} />
-                
+
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<AdminLayout />}>
